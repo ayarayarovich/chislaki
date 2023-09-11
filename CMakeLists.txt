@@ -1,0 +1,10 @@
+cmake_minimum_required(VERSION 3.1)
+project(chislaki)
+
+set(CMAKE_CXX_STANDARD 20)
+
+
+add_executable(gauss_linear_equations_solver src/gauss_linear_equations_solver.cpp)
+
+add_subdirectory(vendor/CLI11)
+target_link_libraries(gauss_linear_equations_solver CLI11::CLI11)
