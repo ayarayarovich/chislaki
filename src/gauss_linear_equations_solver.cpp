@@ -29,10 +29,10 @@ enum class Algorithms
     ALGORITHMS(CREATE_ALGORITHMS_ENUM)
 };
 std::unordered_set<std::string> AVAILABLE_ALGORITHMS{
-        ALGORITHMS(CREATE_STRINGS)
+    ALGORITHMS(CREATE_STRINGS)
 };
 std::unordered_map<std::string, Algorithms> MAP_ALGORITHMS_STR_TO_ENUM{
-        ALGORITHMS(CREATE_STRING_TO_ENUM_MAP)
+    ALGORITHMS(CREATE_STRING_TO_ENUM_MAP)
 };
 
 struct
@@ -113,7 +113,7 @@ matrix::type gauss_per_column_algo(matrix::type mtx)
         for (int yi = k + 1; yi < MATRIX_SIZE; ++yi)
         {
             const matrix::element_type scale = -mtx[yi][k] / mtx[k][k];
-            for (int xi = k; xi < MATRIX_SIZE; ++xi)
+            for (int xi = k; xi < MATRIX_SIZE + 1; ++xi)
             {
                 mtx[yi][xi] += mtx[k][xi] * scale;
             }
@@ -126,7 +126,7 @@ matrix::type gauss_per_column_algo(matrix::type mtx)
         for (int yi = k - 1; yi >= 0; --yi)
         {
             const matrix::element_type scale = -mtx[yi][k] / mtx[k][k];
-            for (int xi = k; xi < MATRIX_SIZE; ++xi)
+            for (int xi = k; xi < MATRIX_SIZE + 1; ++xi)
             {
                 mtx[yi][xi] += mtx[k][xi] * scale;
             }
@@ -164,7 +164,7 @@ matrix::type gauss_per_row_algo(matrix::type mtx)
         for (int yi = k + 1; yi < MATRIX_SIZE; ++yi)
         {
             const matrix::element_type scale = -mtx[yi][k] / mtx[k][k];
-            for (int xi = k; xi < MATRIX_SIZE; ++xi)
+            for (int xi = k; xi < MATRIX_SIZE + 1; ++xi)
             {
                 mtx[yi][xi] += mtx[k][xi] * scale;
             }
@@ -177,7 +177,7 @@ matrix::type gauss_per_row_algo(matrix::type mtx)
         for (int yi = k - 1; yi >= 0; --yi)
         {
             const matrix::element_type scale = -mtx[yi][k] / mtx[k][k];
-            for (int xi = k; xi < MATRIX_SIZE; ++xi)
+            for (int xi = k; xi < MATRIX_SIZE + 1; ++xi)
             {
                 mtx[yi][xi] += mtx[k][xi] * scale;
             }
@@ -250,7 +250,7 @@ matrix::type gauss_full_search_algo(matrix::type mtx)
         for (int yi = k + 1; yi < MATRIX_SIZE; ++yi)
         {
             const matrix::element_type scale = -mtx[yi][k] / mtx[k][k];
-            for (int xi = k; xi < MATRIX_SIZE; ++xi)
+            for (int xi = k; xi < MATRIX_SIZE + 1; ++xi)
             {
                 mtx[yi][xi] += mtx[k][xi] * scale;
             }
@@ -263,7 +263,7 @@ matrix::type gauss_full_search_algo(matrix::type mtx)
         for (int yi = k - 1; yi >= 0; --yi)
         {
             const matrix::element_type scale = -mtx[yi][k] / mtx[k][k];
-            for (int xi = k; xi < MATRIX_SIZE; ++xi)
+            for (int xi = k; xi < MATRIX_SIZE + 1; ++xi)
             {
                 mtx[yi][xi] += mtx[k][xi] * scale;
             }
