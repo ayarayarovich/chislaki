@@ -196,7 +196,7 @@ matrix::type gauss_per_row_algo(matrix::type mtx)
         }
         else
         {
-            matrix::swap_columns(mtx, desired_position, actual_position);
+            matrix::swap_rows(mtx, desired_position, actual_position);
             std::swap(columns[desired_position], columns[actual_position]);
         }
     }
@@ -282,7 +282,7 @@ matrix::type gauss_full_search_algo(matrix::type mtx)
         }
         else
         {
-            matrix::swap_columns(mtx, desired_position, actual_position);
+            matrix::swap_rows(mtx, desired_position, actual_position);
             std::swap(columns[desired_position], columns[actual_position]);
         }
     }
@@ -376,7 +376,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-//    TODO: добавить проверку на совместность системы, а пока пахую...
+//    TODO: добавить проверку на совместность системы, а пока ненадо...
 
     matrix::type result;
 
@@ -397,9 +397,16 @@ int main(int argc, char **argv)
         case Algorithms::ALG_FULL_SEARCH:
         {
             std::cerr << "Using full search algorithm..." << std::endl;
-            result = gauss_full_search_algo(mtx);
+            result = gauss_per_row_algo(mtx);
             break;
         }
+    }
+
+    std::cout << result << std::endl;
+
+    for (int i = 0; i < result.size(); ++i) {
+        result[i][result.size()] /= result[2 - i][i];
+        std::cout << "X" << i << ": " << result[i][result.size()] << std::endl;
     }
 
     std::cout << result << std::endl;
