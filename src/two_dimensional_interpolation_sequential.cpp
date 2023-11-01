@@ -16,103 +16,61 @@ struct
     std::optional<std::filesystem::path> filename_option;
 } config;
 
-class BasePolynomial {
+double base_polynomial(
+        const std::vector<double> &x_values,
+        const std::vector<double> &y_values,
+        int i,
+        int j,
+        double x,
+        double y
+)
+{
+    double divider = 1, result = 1;
+    for (int q = 0; q < y_values.size(); ++q)
+    {
+        for (int p = 0; p < x_values.size(); ++p)
+        {
+            if (p != i && q != j)
+            {
+                result *= (x - x_values[p]) * (y - y_values[q]);
+                divider *= (x_values[i] - x_values[p]) * (y_values[j] - y_values[q]);
+            }
+        }
+    }
+    return result / divider;
+}
+
+class LagrangePolynomial
+{
   public:
-    BasePolynomial(int i, int j, const std::shared_ptr<std::vector<double>> &xValues, const std::shared_ptr<std::vector<double>> &yValues)
-            : i(i), j(j), x_values(xValues), y_values(yValues)
+    LagrangePolynomial(
+            const std::vector<double> &xValues,
+            const std::vector<double> &yValues,
+            const std::vector<std::vector<double>> &zValues
+            )
+            : x_values(xValues),
+              y_values(yValues),
+              z_values(zValues)
     {}
 
-    double evaluate(double x, double y) {
-        double divider = 1, result = 1;
-        for (int p = 0; p < x_values->size(); ++p) {
-            for (int q = 0; q < y_values->size(); ++q) {
-                if (p != i && q != j) {
-                    result *= (x - x_values->at(i)) * (y - y_values->at(j));
-                    divider *= (x_values->at(p) - x_values->at(i)) * (y_values->at(q) - y_values->at(j));
-                }
-            }
-        }
-        return result / divider;
-    }
-
-  private:
-    int i, j;
-    std::shared_ptr<std::vector<double>> x_values, y_values;
-};
-
-//std::function<double(double, double)> create_base_polynomial(const std::vector<double>& x_values, const std::vector<double>& y_values, int i, int j) {
-//    return [i, j, x_values, y_values](double x, double y) -> double {
-//        double divider = 1, result = 1;
-//        for (int p = 0; p < x_values.size(); ++p) {
-//            for (int q = 0; q < y_values.size(); ++q) {
-//                if (p != i && q != j) {
-//                    result *= (x - x_values[i]) * (y - y_values[j]);
-//                    divider *= (x_values[p] - x_values[i]) * (y_values[q] - y_values[j]);
-//                }
-//            }
-//        }
-//        return result / divider;
-//    };
-//}
-
-class LagrangePolynomial {
-  public:
-    LagrangePolynomial(const std::shared_ptr<std::vector<double>> &xValues, const std::shared_ptr<std::vector<double>> &yValues,
-                       const std::shared_ptr<std::vector<std::vector<double>>> &zValues) : x_values(xValues),
-                                                                                           y_values(yValues),
-                                                                                           z_values(zValues),
-                                                                                           base_polynomials(std::make_shared<std::vector<std::vector<BasePolynomial>>>())
+    double evaluate(double x, double y)
     {
-        for (int j = 0; j < y_values->size(); ++j) {
-            base_polynomials->emplace_back();
-            for (int i = 0; i < x_values->size(); ++i) {
-                base_polynomials->back().emplace_back(i, j, x_values, y_values);
-            }
-        }
-    }
-
-    double evaluate(double x, double y) {
         double result = 0;
-        for (int i = 0; i < (*x_values).size(); ++i) {
-            for (int j = 0; j < (*y_values).size(); ++j) {
-                result += (*z_values)[j][i] * (*base_polynomials)[j][i].evaluate(x, y);
+        for (int i = 0; i < x_values.size(); ++i)
+        {
+            for (int j = 0; j < y_values.size(); ++j)
+            {
+                result += z_values[j][i] * base_polynomial(x_values, y_values, i, j, x, y);
             }
         }
         return result;
     }
 
   private:
-    const std::shared_ptr<std::vector<double>> x_values;
-    const std::shared_ptr<std::vector<double>> y_values;
-    const std::shared_ptr<std::vector<std::vector<double>>> z_values;
-    const std::shared_ptr<std::vector<std::vector<BasePolynomial>>> base_polynomials;
+    const std::vector<double> &x_values;
+    const std::vector<double> &y_values;
+    const std::vector<std::vector<double>> &z_values;
 };
-
-//std::function<double(double, double)> create_lagrange_polynomial(
-//        const std::shared_ptr<std::vector<double>> x_values,
-//        const std::shared_ptr<std::vector<double>> y_values,
-//        const std::shared_ptr<std::vector<std::vector<double>>> z_values
-//)
-//{
-//    std::shared_ptr<std::vector<std::vector<BasePolynomial>>> base_polynomials;
-//
-//    for (int j = 0; j < y_values->size(); ++j) {
-//        base_polynomials->emplace_back();
-//        for (int i = 0; i < x_values->size(); ++i) {
-//            base_polynomials->back().emplace_back(i, j, x_values, y_values);
-//        }
-//    }
-//
-//    return [x_values, y_values, z_values, base_polynomials](double x, double y) -> double {
-//        double result = 0;
-//        for (int i = 0; i < x_values.size(); ++i) {
-//            for (int j = 0; j < y_values.size(); ++j) {
-//                result += z_values[j][i] * base_polynomials[j][i](x, y);
-//            }
-//        }
-//        return result;
-//    };
-//}
 
 int main(int argc, char **argv)
 {
@@ -144,18 +102,20 @@ int main(int argc, char **argv)
         in_stream.reset(&std::cin, noop);
     }
 
-    auto x_values = std::make_shared<std::vector<double>>();
-    auto y_values = std::make_shared<std::vector<double>>();
-    auto z_values = std::make_shared<std::vector<std::vector<double>>>();
+    std::vector<double> x_values;
+    std::vector<double> y_values;
+    std::vector<std::vector<double>> z_values;
 
     std::string line;
-    while (line.empty()) {
+    while (line.empty())
+    {
         std::getline(*in_stream, line);
     }
     std::istringstream iss(line);
     double current;
-    while (iss >> current) {
-        x_values->push_back(current);
+    while (iss >> current)
+    {
+        x_values.push_back(current);
     }
 
     while (!in_stream->eof())
@@ -165,50 +125,66 @@ int main(int argc, char **argv)
         iss = std::istringstream(line);
 
         iss >> current;
-        y_values->push_back(current);
+        y_values.push_back(current);
 
-        z_values->emplace_back();
+        z_values.emplace_back();
         while (iss >> current)
         {
-            z_values->back().push_back(current);
+            z_values.back().push_back(current);
         }
     }
 
     LagrangePolynomial polynomial(x_values, y_values, z_values);
-    auto [minX, maxX] = std::minmax_element(x_values->begin(), x_values->end());
-    auto [minY, maxY] = std::minmax_element(y_values->begin(), y_values->end());
+    auto [minX, maxX] = std::minmax_element(x_values.begin(), x_values.end());
+    auto [minY, maxY] = std::minmax_element(y_values.begin(), y_values.end());
 
     std::vector<double> result_x_values, result_y_values;
     std::vector<std::vector<double>> result_z_values;
 
-    double step = 0.2;
-    for (double j = *minY; j <= *maxY; j += step) {
+    double step = 0.05;
+    for (double j = *minY; j <= *maxY + 0.00001; j += step)
+    {
         result_y_values.push_back(j);
     }
-    for (double i = *minX; i <= *maxX; i += step){
+    for (double i = *minX; i <= *maxX + 0.00001; i += step)
+    {
         result_x_values.push_back(i);
     }
 
-    for (int j = 0; j < result_y_values.size(); ++j) {
+    for (double result_y_value : result_y_values)
+    {
         result_z_values.emplace_back();
-        for (int i = 0; i < result_x_values.size(); ++i){
-            result_z_values.back().push_back(polynomial.evaluate(i, j));
+        for (double result_x_value : result_x_values)
+        {
+            result_z_values.back().push_back(polynomial.evaluate(result_x_value, result_y_value));
         }
     }
 
-    std::cout << ", ";
-    for (double result_x_value : result_x_values) {
-        std::cout << result_x_value << ", ";
-    }
-    std::cout << '\n';
 
-    for (int j = 0; j < result_y_values.size(); ++j) {
-        std::cout << result_y_values[j] << ", ";
-        for (int i = 0; i < result_x_values.size(); ++i) {
-            std::cout << result_z_values[j][i] << ", ";
-        }
-        std::cout << '\n';
+    std::ofstream ofs("result.txt");
+    std::stringstream sstream;
+
+    sstream << "; ";
+    for (double result_x_value: result_x_values)
+    {
+        sstream << result_x_value << "; ";
     }
+    sstream << '\n';
+
+    for (int j = 0; j < result_y_values.size(); ++j)
+    {
+        sstream << result_y_values[j] << "; ";
+        for (int i = 0; i < result_x_values.size(); ++i)
+        {
+            sstream << result_z_values[j][i] << "; ";
+        }
+        sstream << '\n';
+    }
+
+    std::string result = sstream.str();
+    std::replace(result.begin(), result.end(), '.', ',');
+
+    ofs << result;
 
     return 0;
 }
